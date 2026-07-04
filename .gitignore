@@ -17,3 +17,5 @@ models/*.pt
 
 .DS_Store
 Thumbs.db
+
+run.sh

@@ -1,3 +1,7 @@
+import os
+
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
 from ultralytics import YOLO
 import cv2
 import numpy as np
@@ -15,8 +19,63 @@ def get_lama():
     global lama
 
     if lama is None:
+        import torch
+
+        original_tensor_to = torch.Tensor.to
+        original_module_to = torch.nn.Module.to
+        original_torch_load = torch.load
+        original_jit_load = torch.jit.load
+
+        def force_cpu_device(value):
+            if value is None:
+                return value
+
+            if "cuda" in str(value).lower():
+                return "cpu"
+
+            return value
+
+        def tensor_to_cpu(self, *args, **kwargs):
+            args = tuple(force_cpu_device(arg) for arg in args)
+
+            if "device" in kwargs:
+                kwargs["device"] = force_cpu_device(kwargs["device"])
+
+            return original_tensor_to(self, *args, **kwargs)
+
+        def module_to_cpu(self, *args, **kwargs):
+            args = tuple(force_cpu_device(arg) for arg in args)
+
+            if "device" in kwargs:
+                kwargs["device"] = force_cpu_device(kwargs["device"])
+
+            return original_module_to(self, *args, **kwargs)
+
+        def torch_load_cpu(*args, **kwargs):
+            kwargs["map_location"] = "cpu"
+            return original_torch_load(*args, **kwargs)
+
+        def jit_load_cpu(*args, **kwargs):
+            kwargs["map_location"] = "cpu"
+            return original_jit_load(*args, **kwargs)
+
+        torch.cuda.is_available = lambda: False
+        torch.Tensor.cuda = lambda self, *args, **kwargs: self
+        torch.nn.Module.cuda = lambda self, *args, **kwargs: self
+        torch.Tensor.to = tensor_to_cpu
+        torch.nn.Module.to = module_to_cpu
+        torch.load = torch_load_cpu
+        torch.jit.load = jit_load_cpu
+
         from simple_lama_inpainting import SimpleLama
-        lama = SimpleLama()
+
+        try:
+            lama = SimpleLama(device="cpu")
+        except TypeError:
+            lama = SimpleLama()
+
+        if hasattr(lama, "model"):
+            lama.model.to("cpu")
 
     return lama
 
@@ -89,7 +148,16 @@ def inpaint_masked_area(image_bgr, mask, padding=96):
     image_pil = Image.fromarray(image_rgb)
     mask_pil = Image.fromarray(mask_crop).convert("L")
 
-    result_pil = get_lama()(image_pil, mask_pil)
+    try:
+        result_pil = get_lama()(image_pil, mask_pil)
+    except RuntimeError as error:
+        if "NVIDIA driver" not in str(error) and "CUDA" not in str(error):
+            raise
+
+        print(f"LaMa-Fehler: {error}", flush=True)
+        print("LaMa konnte nicht auf CPU laufen. Nutze OpenCV-Inpainting.", flush=True)
+        return cv2.inpaint(image_bgr, mask, 3, cv2.INPAINT_TELEA)
+
     result_rgb = np.array(result_pil)
     result_bgr = cv2.cvtColor(result_rgb, cv2.COLOR_RGB2BGR)
 
@@ -104,6 +172,34 @@ def inpaint_masked_area(image_bgr, mask, padding=96):
     result = image_bgr.copy()
     blended_crop = np.where(mask_crop[..., None] > 0, result_bgr, image_crop)
     result[y1:y2, x1:x2] = blended_crop
+
+    return result
+
+
+def pixelate_boxes(image_bgr, boxes, padding=28, scale=0.025):
+    result = image_bgr.copy()
+    height, width = image_bgr.shape[:2]
+
+    for box in boxes:
+        x1, y1, x2, y2 = box.xyxy[0].cpu().numpy().astype(int)
+
+        x1 = max(0, x1 - padding)
+        y1 = max(0, y1 - padding)
+        x2 = min(width, x2 + padding)
+        y2 = min(height, y2 + padding)
+
+        crop = result[y1:y2, x1:x2]
+        crop_height, crop_width = crop.shape[:2]
+
+        if crop_height == 0 or crop_width == 0:
+            continue
+
+        tiny_width = max(1, int(crop_width * scale))
+        tiny_height = max(1, int(crop_height * scale))
+        tiny = cv2.resize(crop, (tiny_width, tiny_height), interpolation=cv2.INTER_LINEAR)
+        pixelated = cv2.resize(tiny, (crop_width, crop_height), interpolation=cv2.INTER_NEAREST)
+
+        result[y1:y2, x1:x2] = pixelated
 
     return result
 
@@ -151,12 +247,7 @@ def blur_license_plates(
 
     progress.update("Kennzeichen werden verpixelt")
     if mode == "pixel":
-        small = cv2.resize(image_bgr, None, fx=0.06, fy=0.06, interpolation=cv2.INTER_LINEAR)
-        processed = cv2.resize(
-            small,
-            (image_bgr.shape[1], image_bgr.shape[0]),
-            interpolation=cv2.INTER_NEAREST
-        )
+        result_bgr = pixelate_boxes(image_bgr, boxes, padding=34, scale=0.018)
     else:
         small = cv2.resize(image_bgr, None, fx=0.035, fy=0.035, interpolation=cv2.INTER_LINEAR)
         frosted = cv2.resize(
@@ -165,8 +256,7 @@ def blur_license_plates(
             interpolation=cv2.INTER_LINEAR
         )
         processed = cv2.GaussianBlur(frosted, (51, 51), 0)
-
-    result_bgr = np.where(mask[..., None] > 0, processed, image_bgr)
+        result_bgr = np.where(mask[..., None] > 0, processed, image_bgr)
 
     progress.update("Ergebnis wird gespeichert")
     cv2.imwrite(output_path, result_bgr)
