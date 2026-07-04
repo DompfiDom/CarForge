@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="result-layout">
+    <div class="result-copy">
+        <p class="eyebrow">Fertig</p>
+        <h1>{{ plate_count }} Kennzeichen.</h1>
+        <p>
+            {{ "Verpixeln" if method == "pixel" else "Smart Entfernen" }}
+        </p>
+        <div class="actions">
+            <a class="primary-button" href="{{ result_data_url }}" download="{{ filename }}">Download</a>
+            <a class="secondary-button" href="{{ url_for('index') }}">Noch eins</a>
+        </div>
+    </div>
+
+    <figure class="preview">
+        <img src="{{ result_data_url }}" alt="Anonymisiertes Auto-Bild">
+    </figure>
+</section>
+{% endblock %}

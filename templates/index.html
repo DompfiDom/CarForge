@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="upload-layout">
+    <div class="intro">
+        <p class="eyebrow">Fuer Auto-Liebhaber</p>
+        <h1>Kennzeichen weg. Bild bleibt sauber.</h1>
+    </div>
+
+    <form class="upload-panel" id="upload-form" action="{{ url_for('process_image') }}" method="post" enctype="multipart/form-data">
+        <label class="drop-zone">
+            <input type="file" name="image" accept="image/jpeg,image/png,image/webp" required>
+            <span class="drop-icon">+</span>
+            <strong>Bild auswaehlen</strong>
+        </label>
+
+        <fieldset class="mode-group">
+            <legend>Methode</legend>
+            <label>
+                <input type="radio" name="method" value="pixel" checked>
+                <span>
+                    <strong>Verpixeln</strong>
+                    <small>Schnell</small>
+                </span>
+            </label>
+            <label>
+                <input type="radio" name="method" value="lama">
+                <span>
+                    <strong>Smart Entfernen</strong>
+                    <small>Sauberer, langsamer</small>
+                </span>
+            </label>
+        </fieldset>
+
+        <button class="primary-button" type="submit">Bild verarbeiten</button>
+
+        <div class="progress-panel" id="progress-panel" hidden>
+            <div class="progress-meta">
+                <span id="progress-label">Start</span>
+                <strong id="progress-percent">0%</strong>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+    </form>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+{% endblock %}

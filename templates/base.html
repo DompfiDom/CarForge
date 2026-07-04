@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CarForge</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <main class="page-shell">
+        <header class="app-header">
+            <a class="brand" href="{{ url_for('index') }}">
+                <img class="brand-logo" src="{{ url_for('static', filename='logo2.png') }}" alt="CarForge Logo">
+            </a>
+        </header>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-list">
+                    {% for message in messages %}
+                        <p class="flash">{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+
+        <footer class="site-footer">
+            <a href="{{ url_for('impressum') }}">Impressum</a>
+            <a href="{{ url_for('datenschutz') }}">Datenschutz</a>
+        </footer>
+    </main>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
