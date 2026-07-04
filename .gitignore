@@ -11,9 +11,9 @@ env/
 
 *.log
 
-backend/auto_*.jpg
-backend/test*.jpg
+auto_*.jpg
+test*.jpg
+models/*.pt
 
 .DS_Store
 Thumbs.db
-

@@ -25,20 +25,18 @@ Uploads werden nur temporaer verarbeitet:
 ## Projektstruktur
 
 ```text
-backend/
-  app.py
-  utils.py
-  requirements.txt
-  models/
-    license-plate-finetune-v1l.pt
-  static/
-  templates/
+app.py
+utils.py
+requirements.txt
+models/
+  license-plate-finetune-v1l.pt
+static/
+templates/
 ```
 
 ## Installation lokal
 
 ```powershell
-cd backend
 python -m venv .venv
 .\.venv\Scripts\activate
 pip install -r requirements.txt
@@ -73,7 +71,7 @@ morsetechlab/yolov11-license-plate-detection
 Modelldatei:
 
 ```text
-backend/models/license-plate-finetune-v1l.pt
+models/license-plate-finetune-v1l.pt
 ```
 
 Modellseite:
@@ -83,6 +81,19 @@ https://huggingface.co/morsetechlab/yolov11-license-plate-detection
 ```
 
 Die Modellseite nennt als Lizenz **AGPL-3.0**.
+
+Die Modelldatei wird nicht ins Git-Repository committed. Lade sie vor dem Start
+von Hugging Face herunter und lege sie hier ab:
+
+```text
+models/license-plate-finetune-v1l.pt
+```
+
+Direkter Download:
+
+```text
+https://huggingface.co/morsetechlab/yolov11-license-plate-detection/resolve/main/license-plate-finetune-v1l.pt
+```
 
 ## Lizenzen und Hinweise
 
@@ -110,6 +121,5 @@ GNU Affero General Public License v3.0
 - Hetzner-AVV abschliessen
 - Impressum und Datenschutz erreichbar halten
 - Keine Testbilder oder fremde Bilder ins Repo hochladen
-- `__pycache__`, `.venv` und lokale Ausgaben nicht committen
+- `__pycache__`, `.venv`, lokale Ausgaben und `.pt`-Modelldateien nicht committen
 - Serverlogs bewusst konfigurieren
-
