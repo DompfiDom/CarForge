@@ -1,40 +1,24 @@
 # CarForge
 
-CarForge ist eine kleine Flask-Webapp fuer Auto-Liebhaber. Bilder koennen hochgeladen werden, Kennzeichen werden erkannt und anschliessend anonymisiert.
+CarForge is a Flask web app for car enthusiasts. It detects license plates in vehicle photos and anonymizes them with either pixelation or AI-assisted inpainting.
 
 ## Features
 
-- Kennzeichen automatisch erkennen
-- Methode **Verpixeln**
-- Methode **Smart Entfernen** mit LaMa-Inpainting
-- Fortschritt im Frontend und in der Konsole
-- Keine dauerhafte Speicherung von Uploads oder Ergebnissen
-- Impressum und Datenschutzerklaerung enthalten
+- Automatic license plate detection
+- Pixelation mode
+- Smart remove mode with LaMa inpainting
+- Frontend progress indicator
+- Temporary image processing without permanent upload storage
+- Downloadable result image
 
-## Datenschutz-Konzept
+## Demo Workflow
 
-Uploads werden nur temporaer verarbeitet:
+1. Upload a vehicle image.
+2. Choose **Verpixeln** or **Smart Entfernen**.
+3. Wait for processing to finish.
+4. Download the anonymized image.
 
-1. Das hochgeladene Bild wird in den Arbeitsspeicher gelesen.
-2. Waehrend der Verarbeitung wird ein temporaeres Verzeichnis mit `tempfile.TemporaryDirectory()` erstellt.
-3. Input- und Output-Dateien liegen nur in diesem temporaeren Verzeichnis.
-4. Nach Abschluss wird das temporaere Verzeichnis automatisch geloescht.
-5. Das Ergebnis wird als Base64 in die Ergebnis-Seite eingebettet.
-6. Nach Abruf der Ergebnis-Seite wird der Job aus dem Server-RAM entfernt.
-
-## Projektstruktur
-
-```text
-app.py
-utils.py
-requirements.txt
-models/
-  license-plate-finetune-v1l.pt
-static/
-templates/
-```
-
-## Installation lokal
+## Local Setup
 
 ```powershell
 python -m venv .venv
@@ -43,83 +27,55 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Danach im Browser oeffnen:
+Open:
 
 ```text
 http://127.0.0.1:5000
 ```
 
-## Produktion
+## Model
 
-Die App sollte online nicht mit `debug=True` betrieben werden. Fuer Linux-Server ist z.B. Gunicorn geeignet:
-
-```bash
-cd backend
-gunicorn -w 1 -b 127.0.0.1:8000 app:app
-```
-
-Davor sollte ein Reverse Proxy wie Nginx oder Caddy fuer HTTPS laufen.
-
-## Modell
-
-Das verwendete Modell stammt von Hugging Face:
-
-```text
-morsetechlab/yolov11-license-plate-detection
-```
-
-Modelldatei:
+CarForge expects the license plate detection model at:
 
 ```text
 models/license-plate-finetune-v1l.pt
 ```
 
-Modellseite:
-
-```text
-https://huggingface.co/morsetechlab/yolov11-license-plate-detection
-```
-
-Die Modellseite nennt als Lizenz **AGPL-3.0**.
-
-Die Modelldatei wird nicht ins Git-Repository committed. Lade sie vor dem Start
-von Hugging Face herunter und lege sie hier ab:
-
-```text
-models/license-plate-finetune-v1l.pt
-```
-
-Direkter Download:
+The model is not included in this repository. Download it from Hugging Face:
 
 ```text
 https://huggingface.co/morsetechlab/yolov11-license-plate-detection/resolve/main/license-plate-finetune-v1l.pt
 ```
 
-## Lizenzen und Hinweise
-
-Dieses Projekt nutzt unter anderem:
-
-- Flask
-- Gunicorn
-- Ultralytics
-- OpenCV
-- NumPy
-- Pillow
-- simple-lama-inpainting
-- morsetechlab/yolov11-license-plate-detection
-
-Da Ultralytics und das verwendete Modell AGPL-3.0-lizenziert sind, sollte der Quellcode dieses Webdienstes fuer Nutzer verfuegbar gemacht werden.
-
-Empfohlene Repo-Lizenz:
+Model page:
 
 ```text
-GNU Affero General Public License v3.0
+https://huggingface.co/morsetechlab/yolov11-license-plate-detection
 ```
 
-## Betriebshinweise
+## Project Structure
 
-- Hetzner-AVV abschliessen
-- Impressum und Datenschutz erreichbar halten
-- Keine Testbilder oder fremde Bilder ins Repo hochladen
-- `__pycache__`, `.venv`, lokale Ausgaben und `.pt`-Modelldateien nicht committen
-- Serverlogs bewusst konfigurieren
+```text
+app.py
+utils.py
+requirements.txt
+models/
+static/
+templates/
+```
+
+## Production
+
+For production, run the Flask app behind a WSGI server and reverse proxy, for example:
+
+```bash
+gunicorn -w 1 -b 127.0.0.1:8000 app:app
+```
+
+Use a reverse proxy such as Nginx or Caddy for HTTPS.
+
+## License
+
+This project is intended to be published under the GNU Affero General Public License v3.0.
+
+It uses AGPL-3.0 components, including Ultralytics and the referenced license plate detection model. See the upstream projects for their respective license terms.
