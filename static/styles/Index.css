@@ -69,7 +69,12 @@ body {
         padding-right: max(14px, env(safe-area-inset-right));
         padding-bottom: max(14px, env(safe-area-inset-bottom));
         padding-left: max(14px, env(safe-area-inset-left));
-        flex-direction: column;
-        gap: 7px;
+        flex-wrap: wrap;
+        gap: 7px 16px;
+    }
+
+    #site-footer small {
+        margin-left: auto;
+        text-align: right;
     }
 }
