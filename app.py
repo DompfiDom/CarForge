@@ -34,7 +34,7 @@ def get_version():
             timeout=3,
         ).strip()
     except (FileNotFoundError, subprocess.SubprocessError):
-        return None
+        return "1.0"
 
     return f"1.0.{count} ({commit})"
 
