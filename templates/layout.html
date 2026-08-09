@@ -1,0 +1,34 @@
+<html lang="de">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+        <title>CarForge | Home</title>
+        <script src="/static/scripts/JQuery.js"></script>
+        <link rel="stylesheet" href="/static/styles/Index.css">
+        <link rel="stylesheet" href="/static/styles/Header.css">
+    </head>
+    <body>
+        <div id="header">
+            <div class="menuItem left" onclick="window.location = 'https://plate.forgeware.de'">Kennzeichen Verstecken</div>
+            {% if "read.test" in session["user"]["roles"] %}
+                <div class="menuItem left" onclick="window.location = '/test'">Test</div>
+            {% endif %}
+            {% if not session.get("user") == None %}
+                <div class="menuItem right" tabindex="0">
+                    <span class="menuLabel">{{session.get("user").get("username")}}</span>
+                    <span class="menuChevron" aria-hidden="true"></span>
+                    
+                    <div class="submenu">
+                        <a href="/settings">Settings</a>
+                        <form method="post" action="/auth/logout">
+                            <button type="submit">Logout</button>
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <div class="menuItem" onclick="window.location = '/auth/login'">Anmelden</div>
+            {% endif %}
+        </div>
+        <div id="content">{% block content %}{% endblock %}</div>
+    </body>
+</html>

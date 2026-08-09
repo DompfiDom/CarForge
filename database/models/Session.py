@@ -6,11 +6,15 @@ Base = declarative_base()
 base = Base
 
 
-class Account(Base):
-    __tablename__ = "accounts"
+class LoginSession(Base):
+    __tablename__ = "LoginSession"
 
     id = Column(Integer, primary_key=True)
-    username = Column(String(255))
-    password = Column(String(255))
+    userID = Column(String(255))
+    device = Column(String(255))
     token = Column(String(255))
-    token = Column(String(255))
+    lastLogin = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )

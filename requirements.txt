@@ -1,6 +1,0 @@
-Flask
-bcrypt
-Flask-Cors
-gunicorn
-PyMySQL
-SQLAlchemy
