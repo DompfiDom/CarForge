@@ -6,17 +6,25 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, redirect, session, url_for
 from werkzeug.middleware.proxy_fix import ProxyFix
 import flask
-from functools import lru_cache, wraps
+from functools import wraps
 import subprocess
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
-@lru_cache(maxsize=1)
 def get_version():
     """Return the deployed revision without breaking pages when Git is unavailable."""
     configured_version = os.environ.get("APP_VERSION")
     if configured_version:
         return configured_version
+
+    version_file = os.path.join(APP_ROOT, ".version")
+    try:
+        with open(version_file, encoding="utf-8") as file:
+            deployed_version = file.read(100).strip()
+        if deployed_version:
+            return deployed_version
+    except OSError:
+        pass
 
     try:
         count = subprocess.check_output(
