@@ -60,11 +60,11 @@ oauth.register(
     },
 )
 
-#@app.context_processor
-#def inject_version():
-#    return {
-#        "app_version": get_version()
-#   }
+@app.context_processor
+def inject_version():
+    return {
+        "app_version": get_version()
+   }
 
 def requireLogin(function):
     @wraps(function)
