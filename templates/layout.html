@@ -29,6 +29,16 @@
                 <div class="menuItem" onclick="window.location = '/auth/login'">Anmelden</div>
             {% endif %}
         </div>
-        <div id="content">{% block content %}{% endblock %}</div>
+        <main id="content">{% block content %}{% endblock %}</main>
+        <footer id="site-footer">
+            <nav aria-label="Rechtliche Informationen">
+                <a href="/impressum">Impressum</a>
+                <span aria-hidden="true">&bull;</span>
+                <a href="/datenschutz">Datenschutz</a>
+            </nav>
+            {% if app_version %}
+                <small>Version {{ app_version }}</small>
+            {% endif %}
+        </footer>
     </body>
 </html>

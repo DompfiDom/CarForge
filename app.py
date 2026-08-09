@@ -6,19 +6,35 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, redirect, session, url_for
 from werkzeug.middleware.proxy_fix import ProxyFix
 import flask
-from functools import wraps
+from functools import lru_cache, wraps
 import subprocess
 
-def get_version():
-    count = subprocess.check_output(
-        ["git", "rev-list", "--count", "HEAD"],
-        text=True
-    ).strip()
+APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
-    commit = subprocess.check_output(
-        ["git", "rev-parse", "--short", "HEAD"],
-        text=True
-    ).strip()
+@lru_cache(maxsize=1)
+def get_version():
+    """Return the deployed revision without breaking pages when Git is unavailable."""
+    configured_version = os.environ.get("APP_VERSION")
+    if configured_version:
+        return configured_version
+
+    try:
+        count = subprocess.check_output(
+            ["git", "rev-list", "--count", "HEAD"],
+            cwd=APP_ROOT,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            timeout=3,
+        ).strip()
+        commit = subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=APP_ROOT,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            timeout=3,
+        ).strip()
+    except (FileNotFoundError, subprocess.SubprocessError):
+        return None
 
     return f"1.0.{count} ({commit})"
 
@@ -60,11 +76,11 @@ oauth.register(
     },
 )
 
-#@app.context_processor
-#def inject_version():
-#    return {
-#        "app_version": get_version()
-#   }
+@app.context_processor
+def inject_version():
+    return {
+        "app_version": get_version()
+    }
 
 def requireLogin(function):
     @wraps(function)
