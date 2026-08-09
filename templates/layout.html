@@ -8,27 +8,28 @@
         <link rel="stylesheet" href="/static/styles/Header.css">
     </head>
     <body>
-        <div id="header">
-            <div class="menuItem left" onclick="window.location = 'https://plate.forgeware.de'">Kennzeichen Verstecken</div>
+        <header id="header">
+            <a class="menuItem left" href="https://plate.forgeware.de">Kennzeichen verstecken</a>
             {% if "read.test" in session["user"]["roles"] %}
-                <div class="menuItem left" onclick="window.location = '/test'">Test</div>
+                <a class="menuItem left" href="/test">Test</a>
             {% endif %}
             {% if not session.get("user") == None %}
-                <div class="menuItem right" tabindex="0">
-                    <span class="menuLabel">{{session.get("user").get("username")}}</span>
-                    <span class="menuChevron" aria-hidden="true"></span>
-                    
+                <details class="account-menu">
+                    <summary class="menuItem right">
+                        <span class="menuLabel">{{session.get("user").get("username")}}</span>
+                        <span class="menuChevron" aria-hidden="true"></span>
+                    </summary>
                     <div class="submenu">
                         <a href="/settings">Settings</a>
                         <form method="post" action="/auth/logout">
                             <button type="submit">Logout</button>
                         </form>
                     </div>
-                </div>
+                </details>
             {% else %}
-                <div class="menuItem" onclick="window.location = '/auth/login'">Anmelden</div>
+                <a class="menuItem" href="/auth/login">Anmelden</a>
             {% endif %}
-        </div>
+        </header>
         <main id="content">{% block content %}{% endblock %}</main>
         <footer id="site-footer">
             <nav aria-label="Rechtliche Informationen">

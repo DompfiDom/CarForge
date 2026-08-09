@@ -59,17 +59,30 @@
     box-shadow:
         0 2px 8px rgba(15, 23, 42, 0.08),
         inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 #header .menuItem:hover {
     cursor: pointer;
 }
 
-#header .menuItem.right {
+#header .account-menu {
     position: relative;
     margin-left: auto;
+    min-width: 0;
+}
+
+#header .menuItem.right {
+    max-width: min(220px, 32vw);
+    margin-left: 0;
     cursor: pointer;
     outline: none;
+    list-style: none;
+}
+
+#header .menuItem.right::-webkit-details-marker {
+    display: none;
 }
 
 #header .menuLabel {
@@ -91,15 +104,13 @@
 }
 
 #header .menuItem.right:hover,
-#header .menuItem.right:focus,
-#header .menuItem.right:focus-within {
+#header .menuItem.right:focus-visible,
+#header .account-menu[open] .menuItem.right {
     border-color: rgba(15, 23, 42, 0.25);
     background: #ffffff;
 }
 
-#header .menuItem.right:hover .menuChevron,
-#header .menuItem.right:focus .menuChevron,
-#header .menuItem.right:focus-within .menuChevron {
+#header .account-menu[open] .menuChevron {
     margin-top: 3px;
     transform: rotate(225deg);
 }
@@ -132,9 +143,7 @@
     content: "";
 }
 
-#header .menuItem.right:hover .submenu,
-#header .menuItem.right:focus .submenu,
-#header .menuItem.right:focus-within .submenu {
+#header .account-menu[open] .submenu {
     visibility: visible;
     opacity: 1;
     transform: translateY(0);
@@ -172,35 +181,66 @@
     background: rgba(15, 23, 42, 0.08);
 }
 
-@media (max-width: 520px) {
+@media (max-width: 600px) {
     #header {
-        height: 122px;
+        height: auto;
+        min-height: 126px;
         padding-right: max(14px, env(safe-area-inset-right));
         padding-left: max(14px, env(safe-area-inset-left));
-        padding-top: 5px;
-        padding-bottom: 9px;
-        align-items: flex-start;
+        padding-top: max(5px, env(safe-area-inset-top));
+        padding-bottom: 10px;
+        align-content: center;
+        align-items: center;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 8px;
     }
 
     #header::before {
-        width: min(340px, calc(100vw - 28px));
-        height: 68px;
-        flex: 0 0 min(340px, calc(100vw - 28px));
+        width: 100%;
+        height: 64px;
+        flex: 0 0 100%;
         background-position: center;
     }
 
     #header .menuItem {
-        position: absolute;
-        right: max(14px, env(safe-area-inset-right));
-        bottom: 9px;
-        max-width: calc(100vw - 28px);
-        min-height: 37px;
-        padding: 7px 11px;
+        position: static;
+        min-height: 44px;
+        padding: 10px 12px;
         font-size: 0.82rem;
+        touch-action: manipulation;
+    }
+
+    #header .account-menu {
+        max-width: min(46%, 190px);
+        margin-left: auto;
     }
 
     #header .menuItem.right {
-        position: absolute;
-        margin-left: 0;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    #header .submenu {
+        width: min(210px, calc(100vw - 28px));
+    }
+
+    #header .submenu a,
+    #header .submenu button {
+        min-height: 46px;
+        padding: 11px 13px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 380px) {
+    #header {
+        gap: 7px;
+    }
+
+    #header .menuItem {
+        padding-right: 10px;
+        padding-left: 10px;
+        font-size: 0.78rem;
     }
 }
