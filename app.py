@@ -7,6 +7,20 @@ from flask import Flask, jsonify, redirect, session, url_for
 from werkzeug.middleware.proxy_fix import ProxyFix
 import flask
 from functools import wraps
+import subprocess
+
+def get_version():
+    count = subprocess.check_output(
+        ["git", "rev-list", "--count", "HEAD"],
+        text=True
+    ).strip()
+
+    commit = subprocess.check_output(
+        ["git", "rev-parse", "--short", "HEAD"],
+        text=True
+    ).strip()
+
+    return f"1.0.{count} ({commit})"
 
 load_dotenv()
 
@@ -45,6 +59,12 @@ oauth.register(
         "scope": "openid profile email",
     },
 )
+
+@app.context_processor
+def inject_version():
+    return {
+        "app_version": get_version()
+    }
 
 def requireLogin(function):
     @wraps(function)
